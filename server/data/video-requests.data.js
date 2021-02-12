@@ -11,9 +11,10 @@ module.exports = {
   },
 
   searchRequests: (topic) => {
-    return VideoRequest.find({ topic_title: topic })
-      .sort({ addedAt: '-1' })
-      .limit(top);
+    // here we find by regex the topic which start with any chunk of data i will send not the exact topic
+    return VideoRequest.find({ topic_title: { $regex: topic, $options: 'i' },
+   }).sort({ addedAt: '-1' })
+      
   },
 
   getRequestById: (id) => {
@@ -32,7 +33,7 @@ module.exports = {
     return VideoRequest.findByIdAndUpdate(id, updates, { new: true });
   },
 
-  updateVoteForRequest: async (id, vote_type) => {
+  updateVoteForRequest: async (id, vote_type) => {  
     const oldRequest = await VideoRequest.findById({ _id: id });
     const other_type = vote_type === 'ups' ? 'downs' : 'ups';
     return VideoRequest.findByIdAndUpdate(
@@ -42,7 +43,8 @@ module.exports = {
           [vote_type]: ++oldRequest.votes[vote_type],
           [other_type]: oldRequest.votes[other_type],
         },
-      }
+      },
+      {new:true}
     );
   },
 
